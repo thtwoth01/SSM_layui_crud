@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC 
+  "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <!-- 转驼峰命名法，不然数据库字段与Java字段无法对应 -->
+  <settings>
+    <setting name="mapUnderscoreToCamelCase" value="true" />
+    <setting name="logImpl" value="STDOUT_LOGGING" />
+  </settings>
+
+  <!-- 别名定义，对应实体类所在的包，以后在Mybatis中配置时可以不用写全路径名 -->
+  <typeAliases>
+    <package name="com.lfy.demo.domain" />
+  </typeAliases>
+  
+</configuration>

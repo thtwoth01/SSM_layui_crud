@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>用户页面</title>
+  <link rel="stylesheet" href="js/layui-2.5.4/css/layui.css">
+  <script src="js/layui-2.5.4/layui.js"></script>
+</head>
+
+<body style="padding: 20px;">
+  <!-- 页面结构 -->
+  <div class="layui-main">
+    <!-- 表格上方标题 -->
+    <blockquote class="layui-elem-quote">用户列表</blockquote>
+    <!-- 添加按钮 -->
+    <a class="layui-btn layui-btn-sm" id="add-user-btn">添加用户</a>
+    <!-- 用户表 -->
+    <table id="user-tbl" lay-filter="user-tbl"></table>
+    <script type="text/html" id="user-tbl-toolbar">
+      <a class="layui-btn layui-btn-xs" lay-event="updateUser">编辑</a>
+      <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="deleteUser">删除</a>
+    </script>
+  </div>
+  
+  <!-- 添加用户弹出层 -->
+  <div id="add-user-layer" style="display: none; padding: 20px">
+    <form id="add-user-form" class="layui-form layui-form-pane">
+      <div class="layui-form-item">
+        <label class="layui-form-label">账户</label>
+        <div class="layui-input-block">
+          <input type="text" name="account" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+          <input type="password" name="password" class="layui-input" lay-verify="required">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-block">
+          <input type="text" name="name" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">信息</label>
+        <div class="layui-input-block">
+          <input type="text" name="info" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn" lay-submit lay-filter="add-user-form-submit">提交</button>
+          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <!-- 更新用户弹出层 -->
+  <div id="update-user-layer" style="display: none; padding: 20px">
+    <form id="update-user-form" class="layui-form layui-form-pane" lay-filter="update-user-form">
+      <div class="layui-form-item" style="display: none;">
+        <label class="layui-form-label">id</label>
+        <div class="layui-input-block">
+          <input type="text" name="id" class="layui-input" readonly>
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">账户</label>
+        <div class="layui-input-block">
+          <input type="text" name="account" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+          <input type="password" name="password" class="layui-input" lay-verify="required">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-block">
+          <input type="text" name="name" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">信息</label>
+        <div class="layui-input-block">
+          <input type="text" name="info" class="layui-input" lay-verify="required" autocomplete="off">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn" lay-submit lay-filter="update-user-form-submit">提交</button>
+          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <!-- 页面JS -->
+  <script>
+    layui.use(['jquery', 'table', 'layer', 'form'], function() {
+      // 加载layui模块，使用其推荐的【预先加载】方式，详见官网【模块规范】一节
+      var $ = layui.$;
+      var table = layui.table;
+      var layer = layui.layer;
+      var form = layui.form;
+      
+      // 显示所有用户
+      table.render({
+        elem: '#user-tbl',
+        url: 'user/all',
+        method: 'get',
+        cols: [[
+          {field: 'account', title: '账户'},
+          {field: 'password', title: '密码'},
+          {field: 'name', title: '姓名'},
+          {field: 'info', title: '信息'},
+          {toolbar: '#user-tbl-toolbar', title: '操作'}
+        ]],
+        // 表格容器id，用于表格重载
+        id: 'user-tbl',
+      });
+      
+      // 显示添加用户弹出层
+      $('#add-user-btn').click(function() {
+        // 每次显示前重置表单
+        $('#add-user-form')[0].reset();
+        layer.open({
+          type: 1,
+          title: '添加用户',
+          skin: 'layui-layer-molv',
+          area: ['500px'],
+          content: $('#add-user-layer')
+        });
+      });
+      
+      // 添加用户表单提交
+      form.on('submit(add-user-form-submit)', function(data) {
+        // ajax方式添加用户
+        $.ajax({
+          url: "user",
+          type: "POST",
+          data: JSON.stringify(data.field),
+          contentType: 'application/json',
+          dataType: 'json',
+          success: function(data) {
+            if (data.status == 1) {
+              layer.close(layer.index);
+              layer.msg('添加成功');
+              table.reload('user-tbl');
+            } else {
+              layer.msg('添加失败');
+            }
+          },
+          error: function() {
+            console.log("ajax error");
+          }
+        });
+        // 阻止表单跳转
+        return false;
+      });
+      
+      // 监听行工具栏事件：删除用户与更新用户
+      table.on('tool(user-tbl)', function(obj) {
+        // 获取当前行数据和lay-event的值
+        var data = obj.data;
+        var event = obj.event;
+        
+        // 删除用户事件
+        if (event === 'deleteUser') {
+          layer.confirm('确定删除该用户吗？', function(index) {
+            // ajax方式删除用户
+            $.ajax({
+              url: 'user/' + data.id,
+              type: "DELETE",
+              dataType: 'json',
+              success: function(data) {
+                if (data.status == 1) {
+                  layer.msg('删除成功');
+                  table.reload('user-tbl');
+                } else {
+                  layer.msg('删除失败');
+                }
+              },
+              error: function() {
+                console.log("ajax error");
+              }
+            });
+            layer.close(index);
+          });
+        }
+        
+        // 更新用户事件
+        if (event === 'updateUser') {
+          // 每次显示更新用户的表单前自动为表单填写该行的数据
+          form.val('update-user-form', {
+            "id": data.id,
+            "account": data.account,
+            "password": data.password,
+            "name": data.name,
+            "info": data.info
+          });
+          // 显示更新用户表单的弹出层
+          layer.open({
+            type: 1,
+            title: '更新用户',
+            skin: 'layui-layer-molv',
+            area: ['500px'],
+            content: $('#update-user-layer')
+          });
+          // 更新用户表单提交
+          form.on('submit(update-user-form-submit)', function(data) {
+            // ajax方式更新用户
+            $.ajax({
+              url: "user",
+              type: "PUT",
+              data: JSON.stringify(data.field),
+              contentType: 'application/json',
+              dataType: 'json',
+              success: function(data) {
+                if (data.status == 1) {
+                  layer.close(layer.index);
+                  layer.msg('更新成功');
+                  table.reload('user-tbl');
+                } else {
+                  layer.msg('更新失败');
+                }
+              },
+              error: function() {
+                console.log("ajax error");
+              }
+            });
+            // 阻止表单跳转
+            return false;
+          });
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
